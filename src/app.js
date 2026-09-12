@@ -1,21 +1,29 @@
 const fs = require("fs");
 const path = require("path")
 
-const songs_path = path.join(__dirname, '../songs')
+const songsPath = path.join(__dirname, '../songs')
 
-let data = fs.readdir(songs_path, 'utf-8', (err, files)=>{
+fs.readdir(songsPath, (err, files)=>{
+    console.log("\n".repeat(3));
+    console.log("==========================================")
+    console.log("==========================================")
+    console.log("        Welcome to your viiBe!😎          ")
+    console.log("==========================================")
+    console.log("==========================================")
+    console.log("\n".repeat(3));
+
     
     if(err){
-        console.log(err)
+        console.log(`Error reading files: ${err.message}`)
     }else{
         let songs = files.filter(song => song.endsWith('.mp3'))
-        console.log()
-        console.log("==========================================")
-        console.log("==========================================")
-        console.log("        Welcome to your viiBe!😎          ")
-        console.log("==========================================")
-        console.log("==========================================")
-        console.log()
-        console.log(songs)
+        console.log("Songs Found: ")
+        console.log("\n".repeat(2));
+
+        if (songs.length == 0){
+            console.log("       No songs found in the directory.")
+        }else{
+            songs.forEach((song, idx) =>   console.log(`${idx+1}. ${song}`))
+        }
     }
 })
