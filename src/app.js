@@ -1,110 +1,184 @@
-const fs = require("fs");
 const path = require("path");
 const readline = require("readline");
-const { spawn } = require("child_process");
+
+const MusicLibrary = require("./library/musicLibrary");
+const MusicPlayer = require("./player/player");
 
 const songsPath = path.join(__dirname, "../songs");
 
-fs.readdir(songsPath, (err, files) => {
+const library = new MusicLibrary(songsPath);
+const player = new MusicPlayer();
 
-    console.log("\n".repeat(3));
-    console.log("==========================================");
-    console.log("==========================================");
-    console.log("        Welcome to your viiBe! 😎         ");
-    console.log("==========================================");
-    console.log("==========================================");
-    console.log("\n".repeat(2));
+const rl = readline.createInterface({
+    input: process.stdin,
+    output: process.stdout,
+});
 
-    if (err) {
-        console.log(`Error reading files: ${err.message}`);
+let currentIndex = 0;
+
+console.log("\n".repeat(3));
+
+console.log("==========================================");
+console.log("==========================================");
+console.log("        Welcome to your viiBe! 😎         ");
+console.log("==========================================");
+console.log("==========================================");
+
+console.log("\n".repeat(2));
+
+
+try {
+    const songs = library.loadSongs();
+
+    if (songs.length === 0) {
+        console.log("❌ No MP3 songs found.");
+        rl.close();
         return;
     }
-
-    const songs = files.filter(song => song.endsWith(".mp3"));
 
     console.log("Songs Found:\n");
 
-    if (songs.length === 0) {
-        console.log("       No songs found in the directory.");
-        return;
-    }
-
-    songs.forEach((song, idx) => {
-        console.log(`${idx + 1}. ${song}`);
+    songs.forEach((song, index) => {
+        console.log(`${index + 1}. ${song}`);
     });
 
     console.log();
 
-    const rl = readline.createInterface({
-        input: process.stdin,
-        output: process.stdout,
+    askForSong();
+
+} catch (error) {
+    console.log(`❌ ${error.message}`);
+    rl.close();
+}
+
+
+function askForSong() {
+    rl.question("Enter song number: ", (answer) => {
+
+        const songNumber = Number(answer);
+
+        if (Number.isNaN(songNumber)) {
+            console.log("\n❌ Please enter a number.\n");
+            askForSong();
+            return;
+        }
+
+        if (
+            songNumber < 1 ||
+            songNumber > library.getSongCount()
+        ) {
+            console.log("\n❌ Invalid song number.");
+            console.log("Please choose a number from the list.\n");
+
+            askForSong();
+            return;
+        }
+
+        currentIndex = songNumber - 1;
+
+        playCurrentSong();
+
+        commandLoop();
     });
+}
 
-    function askForSong() {
 
-        rl.question("Enter song number: ", (answer) => {
+function playCurrentSong() {
+    const selectedSong = library.getSong(currentIndex);
+    const songPath = library.getSongPath(currentIndex);
 
-            const songNumber = Number(answer);
+    console.log(`\n▶ Playing: ${selectedSong}\n`);
 
-            if (Number.isNaN(songNumber)) {
-                console.log("\n❌ Please enter a number.\n");
-                askForSong();
-                return;
-            }
+    player.play(songPath, selectedSong);
+}
 
-            if (songNumber < 1 || songNumber > songs.length) {
-                console.log("\n❌ Invalid song number.");
-                console.log("Please choose a number from the list.\n");
-                askForSong();
-                return;
-            }
 
-            const selectedIndex = songNumber - 1;
+function playNextSong() {
 
-            const selectedSong = songs[selectedIndex];
-
-            console.log(`\n▶ Playing: ${selectedSong}`);
-
-            const fullSongPath = path.join(songsPath, selectedSong);
-
-            const command =
-                process.platform === "darwin"
-                    ? "afplay"
-                    : process.platform === "win32"
-                        ? "cmdmp3"
-                        : "mpg123";
-
-            const playerProcess = spawn(command, [fullSongPath]);
-
-            playerProcess.on("error", (error) => {
-                console.error(
-                    `\n❌ Failed to start audio player (${command}): ${error.message}`
-                );
-
-                if (process.platform !== "darwin") {
-                    console.log(
-                        "Make sure an appropriate audio player is installed and available in PATH."
-                    );
-                }
-
-                rl.close();
-            });
-
-            playerProcess.on("close", (code) => {
-
-                if (code === 0) {
-                    console.log("\n✓ Finished playing.");
-                } else {
-                    console.log(
-                        `\n❌ Player process exited with code ${code}.`
-                    );
-                }
-
-                rl.close();
-            });
-        });
+    if (currentIndex === library.getSongCount() - 1) {
+        console.log("\n⚠️ Already at the last song.");
+        return;
     }
 
-    askForSong();
-});
+    currentIndex++;
 
+    playCurrentSong();
+}
+
+
+function playPreviousSong() {
+
+    if (currentIndex === 0) {
+        console.log("\n⚠️ Already at the first song.");
+        return;
+    }
+
+    currentIndex--;
+
+    playCurrentSong();
+}
+
+
+function commandLoop() {
+    rl.question(
+        "\n[p] Pause   [r] Resume   [n] Next   [b] Previous   [s] Stop   [q] Quit\nCommand: ",
+        (input) => {
+
+            const command = input.trim().toLowerCase();
+
+
+            if (command === "p") {
+                player.pause();
+                commandLoop();
+                return;
+            }
+
+
+            if (command === "r") {
+                player.resume();
+                commandLoop();
+                return;
+            }
+
+
+            if (command === "n") {
+                playNextSong();
+                commandLoop();
+                return;
+            }
+
+
+            if (command === "b") {
+                playPreviousSong();
+                commandLoop();
+                return;
+            }
+
+
+            if (command === "s") {
+                player.stop();
+                commandLoop();
+
+                return;
+            }
+
+
+            if (command === "q") {
+                player.stop();
+
+                console.log("\n👋 Goodbye!");
+
+                rl.close();
+                return;
+            }
+
+
+            console.log("\n❌ Invalid command.");
+            console.log(
+                "Use p, r, n, b, s or q."
+            );
+
+            commandLoop();
+        }
+    );
+}
