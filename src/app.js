@@ -3,11 +3,13 @@ const readline = require("readline");
 
 const MusicLibrary = require("./library/musicLibrary");
 const MusicPlayer = require("./player/player");
+const Display = require("./ui/display");
 
 const songsPath = path.join(__dirname, "../songs");
 
 const library = new MusicLibrary(songsPath);
 const player = new MusicPlayer();
+const display = new Display();
 
 const rl = readline.createInterface({
     input: process.stdin,
@@ -16,15 +18,7 @@ const rl = readline.createInterface({
 
 let currentIndex = 0;
 
-console.log("\n".repeat(3));
-
-console.log("==========================================");
-console.log("==========================================");
-console.log("        Welcome to your viiBe! 😎         ");
-console.log("==========================================");
-console.log("==========================================");
-
-console.log("\n".repeat(2));
+display.showWelcome();
 
 
 try {
@@ -36,13 +30,7 @@ try {
         return;
     }
 
-    console.log("Songs Found:\n");
-
-    songs.forEach((song, index) => {
-        console.log(`${index + 1}. ${song}`);
-    });
-
-    console.log();
+    display.showSongs(songs);
 
     askForSong();
 
@@ -58,7 +46,7 @@ function askForSong() {
         const songNumber = Number(answer);
 
         if (Number.isNaN(songNumber)) {
-            console.log("\n❌ Please enter a number.\n");
+            display.showError("Please enter a number.");
             askForSong();
             return;
         }
@@ -67,8 +55,7 @@ function askForSong() {
             songNumber < 1 ||
             songNumber > library.getSongCount()
         ) {
-            console.log("\n❌ Invalid song number.");
-            console.log("Please choose a number from the list.\n");
+            display.showError("Invalid song number. Please choose a number from the list.");
 
             askForSong();
             return;
@@ -87,7 +74,7 @@ function playCurrentSong() {
     const selectedSong = library.getSong(currentIndex);
     const songPath = library.getSongPath(currentIndex);
 
-    console.log(`\n▶ Playing: ${selectedSong}\n`);
+    display.showNowPlaying(selectedSong);
 
     player.play(songPath, selectedSong);
 }
@@ -120,8 +107,9 @@ function playPreviousSong() {
 
 
 function commandLoop() {
+    display.showControls();
     rl.question(
-        "\n[p] Pause   [r] Resume   [n] Next   [b] Previous   [s] Stop   [q] Quit\nCommand: ",
+        "\nCommand: ",
         (input) => {
 
             const command = input.trim().toLowerCase();
@@ -173,10 +161,7 @@ function commandLoop() {
             }
 
 
-            console.log("\n❌ Invalid command.");
-            console.log(
-                "Use p, r, n, b, s or q."
-            );
+            display.showError("Invalid command. Use p, r, n, b, s or q.");
 
             commandLoop();
         }
