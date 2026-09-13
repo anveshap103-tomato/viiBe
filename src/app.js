@@ -108,6 +108,13 @@ function playPreviousSong() {
 
 function commandLoop() {
     display.showControls();
+        console.log();
+
+    console.log(
+        "\x1b[95m\x1b[1m" +
+        "╭───────────────────── COMMAND ─────────────────────╮" +
+        "\x1b[0m"
+    );
     rl.question(
         "\nCommand: ",
         (input) => {
