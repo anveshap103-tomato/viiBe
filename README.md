@@ -40,7 +40,7 @@ No external npm packages are required for the current version.
 
 ---
 
-## 📁 Project Structure
+##  Project Structure
 
 ```text
 viiBe/
@@ -86,7 +86,10 @@ songs/
 The folder where you place your own MP3 files.
 
 
-Getting Started
+
+
+🚀 Getting Started
+
 Requirements
 
 Currently, viiBe requires:
@@ -99,7 +102,9 @@ MP3 audio files
 Note: v1.0.0 uses macOS afplay, so this version is currently macOS-only.
 
 
- nstallation
+
+
+📥 Installation
 
 Clone the repository:
 
@@ -116,7 +121,9 @@ npm install
 There are currently no external dependencies, but running npm install ensures the project is initialized correctly from package.json.
 
 
- Adding Your Songs
+
+
+🎵 Adding Your Songs
 
 Create a songs folder in the root of the project:
 
@@ -144,7 +151,8 @@ Example
 MP3 files are intentionally not included in this repository. Add your own music files that you have the right to use.
 
 
-Running viiBe
+
+▶️ Running viiBe
 
 From the project directory, run:
 
@@ -159,7 +167,8 @@ Enter song number: 2
 The selected song will then start playing.
 
 
- Controls
+
+🎮 Controls
 
 Once a song is playing, use the following commands:
 
@@ -187,7 +196,8 @@ Command: q
 👋 Goodbye!
 
 
- How viiBe Works
+
+🧠 How viiBe Works
 
 The application follows a simple flow:
 
@@ -217,7 +227,10 @@ The application follows a simple flow:
        └─────────────┼─────────────┘
                      ▼
                   Continue
- Node.js Concepts Used
+
+
+
+🧩 Node.js Concepts Used
 
 viiBe is also a learning project for understanding Node.js.
 
@@ -261,7 +274,8 @@ Different sections of the interface are visually separated:
 The goal is to keep the application lightweight while still making the terminal experience enjoyable.
 
 
- Current Limitations
+
+⚠️ Current Limitations
 
 v1.0.0 is intentionally simple.
 
@@ -282,7 +296,8 @@ No progress bar
 These features may be added in future versions.
 
 
- Roadmap
+
+🗺️ Roadmap
 
 viiBe will be developed incrementally.
 
@@ -330,13 +345,16 @@ Possible future improvements:
  Installable CLI package
 
 
- Version
+
+📌 Version
 
 Current version:
 
 v1.0.0
 
 viiBe follows a version-based development approach so that new features can be introduced without making the initial application unnecessarily complex.
+
+
 
 
 🎵 viiBe
