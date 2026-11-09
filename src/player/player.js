@@ -1,7 +1,8 @@
 const { spawn } = require("child_process");
 
 class MusicPlayer {
-    constructor() {
+    constructor(spawnProcess = spawn) {
+        this.spawnProcess = spawnProcess;
         this.playerProcess = null;
         this.isPaused = false;
         this.isStopped = true;
@@ -15,23 +16,40 @@ class MusicPlayer {
             );
         }
 
-        // Stop the currently playing song if there is one
         if (this.playerProcess) {
             this.stop(false);
         }
 
         this.currentSong = songName;
 
-        this.playerProcess = spawn("afplay", [songPath]);
+        let playerProcess;
+
+        try {
+            playerProcess = this.spawnProcess("afplay", [songPath]);
+        } catch (error) {
+            this.isStopped = true;
+            this.currentSong = null;
+            throw error;
+        }
+
+        this.playerProcess = playerProcess;
 
         this.isPaused = false;
         this.isStopped = false;
 
-        this.playerProcess.on("error", (error) => {
+        playerProcess.on("error", (error) => {
+            if (this.playerProcess !== playerProcess) {
+                return;
+            }
+
             console.error(`\n❌ Player error: ${error.message}`);
         });
 
-        this.playerProcess.on("close", (code) => {
+        playerProcess.on("close", (code) => {
+            if (this.playerProcess !== playerProcess) {
+                return;
+            }
+
             this.playerProcess = null;
 
             if (!this.isStopped) {

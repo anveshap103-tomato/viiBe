@@ -1,3 +1,5 @@
+#!/usr/bin/env node
+
 const path = require("path");
 const readline = require("readline");
 
@@ -43,10 +45,11 @@ try {
 function askForSong() {
     rl.question("Enter song number: ", (answer) => {
 
-        const songNumber = Number(answer);
+        const trimmedAnswer = answer.trim();
+        const songNumber = Number(trimmedAnswer);
 
-        if (Number.isNaN(songNumber)) {
-            display.showError("Please enter a number.");
+        if (!/^\d+$/.test(trimmedAnswer) || !Number.isInteger(songNumber)) {
+            display.showError("Please enter a whole song number.");
             askForSong();
             return;
         }
@@ -63,9 +66,9 @@ function askForSong() {
 
         currentIndex = songNumber - 1;
 
-        playCurrentSong();
-
-        commandLoop();
+        if (playCurrentSong()) {
+            commandLoop();
+        }
     });
 }
 
@@ -74,9 +77,20 @@ function playCurrentSong() {
     const selectedSong = library.getSong(currentIndex);
     const songPath = library.getSongPath(currentIndex);
 
-    display.showNowPlaying(selectedSong);
+    if (!selectedSong || !songPath) {
+        display.showError("Unable to find the selected song.");
+        return false;
+    }
 
-    player.play(songPath, selectedSong);
+    try {
+        player.play(songPath, selectedSong);
+        display.showNowPlaying(selectedSong);
+        return true;
+    } catch (error) {
+        display.showError(error.message);
+        rl.close();
+        return false;
+    }
 }
 
 
